@@ -24,18 +24,23 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout",
 
 
 //routes
-app.get("/", (req, res)=> {
+app.get("/", (req, res) => {
     res.send(index.html)
 });
 
-app.get("/exercise", (req, res)=> {
+app.get("/exercise", (req, res) => {
     res.sendFile(path.join( __dirname, "./public/exercise.html"))
 });
 
-app.get("/stats", (req, res)=> {
+app.get("/stats", (req, res) => {
     res.sendFile(path.join( __dirname, "./public/stats.html"))
 });
 
+app.get("/app/workouts", (req, res) => {
+    db.Workout.find({}).then(dbWorkout => {
+        res.json(dbWorkout);
+    })
+})
 
 app.post("/api/workouts", (req, res) => {
     db.Workout.create({day: new Date(new Date().setDate(new Date().getDate())), exercises:[]}).then(dbWorkout=>{
@@ -56,18 +61,8 @@ app.get("/api/workouts/range", (req, res) => {
         });
 });
 
-app.get("/api/workouts/range", (req, res) => {
-    db.Workout.find({})
-        .then((dbWorkout) => {
-            res.json(dbWorkout);
-        })
-        .catch((err) => {
-            res.json(err);
-        });
-});
-
 app.put("/api/workouts/:params", (req, res) => {
-    let param = req.params.param
+    let param = req.params.param;
     db.Workout.findByIdAndUpdate({_id:param}, {$push: {exercises:req.body}})
         .then((dbWorkout) => {
             res.json(dbWorkout);
